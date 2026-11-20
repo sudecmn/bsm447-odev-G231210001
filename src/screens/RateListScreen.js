@@ -1,17 +1,79 @@
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { useEffect, useState } from 'react';
+import { View, Text, FlatList, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
+import { fetchRates } from '../services/rateService';
 
 export default function RateListScreen({ navigation }) {
+  const [rates, setRates] = useState([]);
+  const [rateDate, setRateDate] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    loadRates();
+  }, []);
+
+  async function loadRates() {
+    try {
+      const result = await fetchRates();
+      setRates(result.rates);
+      setRateDate(result.date);
+    } catch (error) {
+      setErrorMessage('Kurlar yüklenemedi. İnternet bağlantını kontrol et.');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  if (errorMessage) {
+    return (
+      <View style={styles.center}>
+        <Text>{errorMessage}</Text>
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>Kur listesi burada olacak</Text>
-      <Button
-        title="Deneme: USD detayına git"
-        onPress={() => navigation.navigate('RateDetail', { code: 'USD' })}
-      />
-    </View>
+    <FlatList
+      data={rates}
+      keyExtractor={(item) => item.code}
+      renderItem={({ item }) => (
+        <Pressable
+          style={styles.row}
+          onPress={() =>
+            navigation.navigate('RateDetail', {
+              code: item.code,
+              rate: item.rate,
+              date: rateDate,
+            })
+          }
+        >
+          <Text style={styles.code}>{item.code}</Text>
+          <Text style={styles.rate}>{item.rate}</Text>
+        </Pressable>
+      )}
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    backgroundColor: '#fff',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#ddd',
+  },
+  code: { fontSize: 16, fontWeight: '600' },
+  rate: { fontSize: 16 },
 });
