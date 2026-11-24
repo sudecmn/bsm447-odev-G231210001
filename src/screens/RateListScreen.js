@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { View, Text, FlatList, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
 import { fetchRates } from '../services/rateService';
+import RateRow from '../components/RateRow';
 
 export default function RateListScreen({ navigation }) {
   const [rates, setRates] = useState([]);
@@ -24,6 +25,14 @@ export default function RateListScreen({ navigation }) {
     }
   }
 
+  function openDetail(item) {
+    navigation.navigate('RateDetail', {
+      code: item.code,
+      rate: item.rate,
+      date: rateDate,
+    });
+  }
+
   if (isLoading) {
     return (
       <View style={styles.center}>
@@ -45,19 +54,7 @@ export default function RateListScreen({ navigation }) {
       data={rates}
       keyExtractor={(item) => item.code}
       renderItem={({ item }) => (
-        <Pressable
-          style={styles.row}
-          onPress={() =>
-            navigation.navigate('RateDetail', {
-              code: item.code,
-              rate: item.rate,
-              date: rateDate,
-            })
-          }
-        >
-          <Text style={styles.code}>{item.code}</Text>
-          <Text style={styles.rate}>{item.rate}</Text>
-        </Pressable>
+        <RateRow code={item.code} rate={item.rate} onPress={() => openDetail(item)} />
       )}
     />
   );
@@ -65,15 +62,4 @@ export default function RateListScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#ddd',
-  },
-  code: { fontSize: 16, fontWeight: '600' },
-  rate: { fontSize: 16 },
 });
