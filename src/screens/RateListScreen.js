@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react';
 import { View, Text, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
 import { fetchRates } from '../services/rateService';
 import RateRow from '../components/RateRow';
+import SearchBar from '../components/SearchBar';
 
 export default function RateListScreen({ navigation }) {
   const [rates, setRates] = useState([]);
   const [rateDate, setRateDate] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
+  const [searchText, setSearchText] = useState('');
 
   useEffect(() => {
     loadRates();
@@ -33,6 +35,11 @@ export default function RateListScreen({ navigation }) {
     });
   }
 
+  const query = searchText.trim().toLowerCase();
+  const filteredRates = rates.filter((item) =>
+    item.code.toLowerCase().includes(query)
+  );
+
   if (isLoading) {
     return (
       <View style={styles.center}>
@@ -50,16 +57,21 @@ export default function RateListScreen({ navigation }) {
   }
 
   return (
-    <FlatList
-      data={rates}
-      keyExtractor={(item) => item.code}
-      renderItem={({ item }) => (
-        <RateRow code={item.code} rate={item.rate} onPress={() => openDetail(item)} />
-      )}
-    />
+    <View style={styles.container}>
+      <SearchBar value={searchText} onChangeText={setSearchText} />
+      <FlatList
+        data={filteredRates}
+        keyExtractor={(item) => item.code}
+        keyboardShouldPersistTaps="handled"
+        renderItem={({ item }) => (
+          <RateRow code={item.code} rate={item.rate} onPress={() => openDetail(item)} />
+        )}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
 });
