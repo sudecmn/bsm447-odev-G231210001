@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { getFlagEmoji } from '../utils/currency';
+import { formatDate } from '../utils/date';
 
 export default function RateDetailScreen({ route }) {
   const { code, rate, date } = route.params;
@@ -9,7 +10,7 @@ export default function RateDetailScreen({ route }) {
       <Text style={styles.flag}>{getFlagEmoji(code)}</Text>
       <Text style={styles.title}>{code}</Text>
       <Text>1 EUR = {rate} {code}</Text>
-      <Text>Kur tarihi: {date}</Text>
+      <Text>Kur tarihi: {formatDate(date)}</Text>
     </View>
   );
 }
