@@ -7,3 +7,12 @@ export function getFlagEmoji(currencyCode) {
   );
   return String.fromCodePoint(...codePoints);
 }
+export function parseAmount(text) {
+  const normalized = text.replace(/,/g, '.');
+  const value = parseFloat(normalized);
+  return Number.isNaN(value) ? 0 : value;
+}
+
+export function formatAmount(value) {
+  return value.toFixed(2);
+}

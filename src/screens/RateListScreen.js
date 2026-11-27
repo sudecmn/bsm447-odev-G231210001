@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { View, Text, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
 import { fetchRates } from '../services/rateService';
 import { formatDate } from '../utils/date';
+import { parseAmount } from '../utils/currency';
 import RateRow from '../components/RateRow';
 import SearchBar from '../components/SearchBar';
+import AmountInput from '../components/AmountInput';
 
 export default function RateListScreen({ navigation }) {
   const [rates, setRates] = useState([]);
@@ -11,6 +13,7 @@ export default function RateListScreen({ navigation }) {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const [searchText, setSearchText] = useState('');
+  const [amountText, setAmountText] = useState('1');
 
   useEffect(() => {
     loadRates();
@@ -36,6 +39,8 @@ export default function RateListScreen({ navigation }) {
     });
   }
 
+  const amount = parseAmount(amountText);
+
   const query = searchText.trim().toLowerCase();
   const filteredRates = rates.filter((item) =>
     item.code.toLowerCase().includes(query)
@@ -59,6 +64,7 @@ export default function RateListScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      <AmountInput value={amountText} onChangeText={setAmountText} />
       <SearchBar value={searchText} onChangeText={setSearchText} />
 
       <View style={styles.infoBar}>
@@ -71,7 +77,12 @@ export default function RateListScreen({ navigation }) {
         keyExtractor={(item) => item.code}
         keyboardShouldPersistTaps="handled"
         renderItem={({ item }) => (
-          <RateRow code={item.code} rate={item.rate} onPress={() => openDetail(item)} />
+          <RateRow
+            code={item.code}
+            rate={item.rate}
+            convertedAmount={amount * item.rate}
+            onPress={() => openDetail(item)}
+          />
         )}
         ListEmptyComponent={
           <View style={styles.emptyBox}>
